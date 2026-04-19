@@ -14,11 +14,25 @@
 
 ## 系统要求
 
-- Rust 1.70+ (Edition 2024)
 - macOS / Linux / Windows
 - 有效的 LLM API 密钥（支持 OpenAI 兼容接口）
 
 ## 安装
+
+### 使用安装脚本（推荐）
+
+```bash
+# 一键安装最新版本
+curl -fsSL https://raw.githubusercontent.com/kibuniverse/ai-terminal-inspect/master/install.sh | bash
+
+# 安装完成后，可以使用以下命令：
+# ai-terminal-inspect <command>
+# 或使用快捷命令
+# ati <command>
+```
+
+> **注意**: 安装脚本会自动下载适用于您系统的二进制文件，并将其安装到 `~/.local/bin` 目录。
+> 请确保 `~/.local/bin` 在您的 PATH 环境变量中。
 
 ### 从源码编译
 

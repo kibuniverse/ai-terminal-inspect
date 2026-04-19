@@ -14,11 +14,25 @@ An intelligent command-line error diagnostic tool that automatically analyzes co
 
 ## System Requirements
 
-- Rust 1.70+ (Edition 2024)
 - macOS / Linux / Windows
 - Valid LLM API key (supports OpenAI-compatible interfaces)
 
 ## Installation
+
+### Using Installation Script (Recommended)
+
+```bash
+# One-click install the latest version
+curl -fsSL https://raw.githubusercontent.com/kibuniverse/ai-terminal-inspect/master/install.sh | bash
+
+# After installation, you can use the following commands:
+# ai-terminal-inspect <command>
+# or use the shortcut command
+# ati <command>
+```
+
+> **Note**: The installation script will automatically download the binary file suitable for your system and install it to the `~/.local/bin` directory.
+> Please ensure that `~/.local/bin` is in your PATH environment variable.
 
 ### Build from Source
 
