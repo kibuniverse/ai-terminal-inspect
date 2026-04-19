@@ -46,7 +46,7 @@ pub async fn call_llm(input: &str, config: &Config) -> Result<String, String> {
     let client = Client::new();
 
     let res = client
-        .post(&config.base_url.clone().unwrap())
+        .post(config.base_url.clone().unwrap())
         .header("Content-Type", "application/json")
         .header("Authorization", format!("Bearer {}", config.api_key.clone().unwrap()))
         .json(&json!({
@@ -60,10 +60,13 @@ pub async fn call_llm(input: &str, config: &Config) -> Result<String, String> {
         .await;
     match res {
         Ok(response) => {
-            let base = response.text().await.unwrap();
-            let base: LLMResponse = serde_json::from_str(&base).unwrap();
-            Ok(base.choices[0].message.content.clone())
+            let body = response.text().await.map_err(|e| format!("Failed to read response: {}", e))?;
+            let parsed: LLMResponse = serde_json::from_str(&body)
+                .map_err(|e| format!("Failed to parse LLM response: {}\nRaw: {}", e, body))?;
+            parsed.choices.into_iter().next()
+                .map(|c| c.message.content)
+                .ok_or_else(|| "LLM response contains no choices".to_string())
         }
-        Err(e) => Err(e.to_string()),
+        Err(e) => Err(format!("Failed to call LLM API: {}", e)),
     }
 }

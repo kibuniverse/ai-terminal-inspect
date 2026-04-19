@@ -14,7 +14,7 @@ impl Config {
     fn config_path() -> Option<PathBuf> {
         use directories::BaseDirs;
         let base = BaseDirs::new()?;
-        let config_dir = base.home_dir().join(".config/ai_terminal_inspect");
+        let config_dir = base.home_dir().join(".config/ai-terminal-inspect");
         fs::create_dir_all(&config_dir).ok();
         Some(config_dir.join("config.toml"))
     }

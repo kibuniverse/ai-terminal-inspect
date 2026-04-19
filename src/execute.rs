@@ -1,7 +1,6 @@
-use std::{process::Command, sync::mpsc};
+use std::process::Command;
 
 pub fn run_shell(command: &str) -> Result<String, Box<dyn std::error::Error>>  {
-    // let (cx, rx) = mpsc::channel::<String>();
      let output = Command::new("sh")
         .arg("-c")
         .arg(command)
