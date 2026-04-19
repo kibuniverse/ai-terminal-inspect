@@ -16,6 +16,11 @@ async fn main() {
         std::process::exit(1);
     });
 
+    if commands.is_empty() {
+        eprintln!("No command provided. Usage: ati <command>");
+        std::process::exit(1);
+    }
+
     // 检查是否是 config 子命令
     if !commands.is_empty() && commands[0] == "config" {
         if let Err(e) = config_command::handle_config_command(&commands[1..]) {
