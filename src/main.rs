@@ -26,7 +26,7 @@ async fn main() {
         skin.print_inline("Error detected:");
         skin = MadSkin::default();
         skin.print_text(" AI is currently analyzing...");
-        let llm_response = llm::call_llm(&error_message).await.unwrap();
+        let llm_response = llm::call_llm(&error_message, &config.unwrap()).await.unwrap();
         skin.paragraph.set_fg(Color::Green);
         skin.print_text("Analysis completed");
         skin = MadSkin::default();
