@@ -19,7 +19,6 @@ async fn main() {
             eprintln!("Error initializing config: {}", config_error);
             return;
         };
-        println!("{:?}", config);
         let error_message = exec_result.err().unwrap().to_string();
         let mut skin = MadSkin::default();
         skin.paragraph.set_fg(Color::Red);

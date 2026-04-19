@@ -42,18 +42,20 @@ cp target/release/ai-terminal-inspect /usr/local/bin/
 # LLM API 密钥（必需）
 export API_KEY="your-api-key-here"
 
-# API 基础 URL（必需）
-export BASE_URL="https://api.minimaxi.com/v1/text/chatcompletion_v2"
+# API 基础 URL（必需）, 任何符合OpenAI 兼容接口均可
+export BASE_URL="https://your-api-host/v1/chat/completions"
 
 # 使用的模型名称（必需）
-export MODEL="MiniMax-M2.5"
+export MODEL="gpt-4"
 ```
 
 ### 支持的 LLM 提供商
 
 本工具支持任何兼容 OpenAI API 格式的服务商，包括但不限于：
 - MiniMax
+- ZAI
 - OpenAI
+- DeepSeek
 - 其他兼容 OpenAI 接口的服务
 
 ## 使用方法
