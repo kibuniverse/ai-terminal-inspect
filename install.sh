@@ -1,87 +1,90 @@
 #!/bin/bash
 
+# 发生错误时退出
 set -e
 
-# 配置
 REPO="kibuniverse/ai-terminal-inspect"
-TOOL_NAME="ati"
+APP_NAME="ai-terminal-inspect"
+SHORT_NAME="ati"
+INSTALL_DIR="$HOME/.local/bin"
 
-# 检测平台
-detect_platform() {
-    local _ostype _cputype
-    _ostype="$(uname -s)"
-    _cputype="$(uname -m)"
+echo "🚀 开始安装 $APP_NAME..."
 
-    case "$_ostype" in
-        Linux) _ostype="unknown-linux-gnu" ;;
-        Darwin) _ostype="apple-darwin" ;;
-        *) echo "错误: 不支持的操作系统: $_ostype"; exit 1 ;;
-    esac
+# 1. 检查并创建本地安装目录
+if [ ! -d "$INSTALL_DIR" ]; then
+    mkdir -p "$INSTALL_DIR"
+    echo "📁 创建了安装目录: $INSTALL_DIR"
+fi
 
-    case "$_cputype" in
-        x86_64) ;;
-        aarch64|arm64) _cputype="aarch64" ;;
-        *) echo "错误: 不支持的架构: $_cputype"; exit 1 ;;
-    esac
+# 2. 检测操作系统和架构
+OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
+ARCH="$(uname -m)"
 
-    echo "${_cputype}-${_ostype}"
-}
+# 匹配常见的架构名称
+if [ "$ARCH" = "x86_64" ]; then
+    ARCH_NAME="x86_64"
+elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+    ARCH_NAME="aarch64" # 注意：如果你的 M1/M2 Mac Release 包名为 arm64，请将此处改为 arm64
+else
+    echo "❌ 不支持的架构: $ARCH"
+    exit 1
+fi
 
-# 获取最新版本
-get_latest_version() {
-    curl -s "https://api.github.com/repos/$REPO/releases/latest" | 
-    grep '"tag_name":' | 
-    sed -E 's/.*"([^"]+)".*/\1/'
-}
+# 匹配常见的系统名称 (这里使用了常见的 target triple 命名习惯)
+if [ "$OS" = "darwin" ]; then
+    OS_NAME="apple-darwin"
+elif [ "$OS" = "linux" ]; then
+    OS_NAME="unknown-linux-gnu"
+else
+    echo "❌ 不支持的操作系统: $OS"
+    exit 1
+fi
 
-# 安装
-main() {
-    echo "🔧 正在安装 $TOOL_NAME..."
-    
-    PLATFORM=$(detect_platform)
-    VERSION=$(get_latest_version)
-    
-    echo "检测到平台: $PLATFORM"
-    echo "最新版本: $VERSION"
-    
-    # 下载地址
-    DOWNLOAD_URL="https://github.com/$REPO/releases/download/$VERSION/${TOOL_NAME}-${PLATFORM}.tar.gz"
-    
-    # 临时目录
-    TMP_DIR=$(mktemp -d)
-    cd "$TMP_DIR"
-    
-    echo "📥 正在下载..."
-    curl -L -o "${TOOL_NAME}.tar.gz" "$DOWNLOAD_URL"
-    
-    echo "📦 正在解压..."
-    tar xzf "${TOOL_NAME}.tar.gz"
-    
-    # 安装路径
-    INSTALL_DIR="$HOME/.local/bin"
-    if [ ! -d "$INSTALL_DIR" ]; then
-        mkdir -p "$INSTALL_DIR"
-    fi
-    
-    echo "⚙️  正在安装到 $INSTALL_DIR..."
-    mv "$TOOL_NAME" "$INSTALL_DIR/"
-    chmod +x "$INSTALL_DIR/$TOOL_NAME"
-    
-    # 清理
-    cd ..
-    rm -rf "$TMP_DIR"
-    
-    # 检查 PATH
-    if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
-        echo ""
-        echo "⚠️  警告: $INSTALL_DIR 不在 PATH 中"
-        echo "请添加以下行到你的 ~/.bashrc 或 ~/.zshrc："
-        echo "    export PATH=\"\$HOME/.local/bin:\$PATH\""
-    fi
-    
-    echo ""
-    echo "✅ 安装成功！"
-    echo "运行 '$TOOL_NAME --help' 开始使用"
-}
+# ⚠️ 注意：这里假设了你的 GitHub Release 压缩包命名规范。
+# 例如：ai-terminal-inspect-x86_64-apple-darwin.tar.gz
+# 请确保此处与你实际打包（如 GitHub Actions 或 cargo-dist）的产物名称一致！
+ASSET_NAME="${APP_NAME}-${ARCH_NAME}-${OS_NAME}.tar.xz"
 
-main
+# 3. 通过 GitHub API 获取最新版本的下载链接
+echo "🔍 正在获取 $REPO 的最新版本信息..."
+LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/${REPO}/releases/latest | grep "browser_download_url" | grep "$ASSET_NAME" | cut -d '"' -f 4)
+
+if [ -z "$LATEST_RELEASE_URL" ]; then
+    echo "❌ 错误: 未在最新 Release 中找到匹配 $ASSET_NAME 的下载链接。"
+    echo "👉 请检查 GitHub Releases 中资产的命名格式是否与脚本中的 ASSET_NAME 匹配。"
+    exit 1
+fi
+
+# 4. 下载并解压
+TMP_DIR=$(mktemp -d)
+echo "⬇️  正在下载: $LATEST_RELEASE_URL"
+curl -L --progress-bar "$LATEST_RELEASE_URL" -o "$TMP_DIR/$ASSET_NAME"
+
+echo "📦 正在解压..."
+# 如果你的 Release 是直接的二进制文件而不是压缩包，请删除 tar 解压步骤，并直接移动文件
+tar -xzf "$TMP_DIR/$ASSET_NAME" -C "$TMP_DIR"
+
+# 5. 安装与配置软链接
+# 假设解压出来的可执行文件名为 ai-terminal-inspect
+mv "$TMP_DIR/$APP_NAME" "$INSTALL_DIR/$APP_NAME"
+chmod +x "$INSTALL_DIR/$APP_NAME"
+
+# 创建简写命令 'ati' 的软链接
+ln -sf "$INSTALL_DIR/$APP_NAME" "$INSTALL_DIR/$SHORT_NAME"
+
+# 清理临时文件
+rm -rf "$TMP_DIR"
+
+echo "================================================="
+echo "✅ $APP_NAME 安装成功！"
+echo "📍 可执行文件路径: $INSTALL_DIR/$APP_NAME"
+echo "⚡ 快捷命令已就绪:  $SHORT_NAME"
+echo "================================================="
+echo ""
+echo "💡 提示: 如果你在终端输入 '$SHORT_NAME' 提示 command not found，"
+echo "请确保 $INSTALL_DIR 已加入你的 PATH 环境变量中。"
+echo "你可以通过执行以下命令将其添加到你的配置文件中 (如 ~/.zshrc 或 ~/.bashrc):"
+echo ""
+echo '    echo '\''export PATH="$HOME/.local/bin:$PATH"'\'' >> ~/.zshrc'
+echo '    source ~/.zshrc'
+echo "================================================="
