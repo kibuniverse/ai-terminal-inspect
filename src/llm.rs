@@ -44,10 +44,11 @@ struct Messages {
 
 pub async fn call_llm(input: &str, config: &Config) -> Result<String, String> {
     let client = Client::new();
+
     let res = client
-        .post(&config.base_url)
+        .post(&config.base_url.clone().unwrap())
         .header("Content-Type", "application/json")
-        .header("Authorization", format!("Bearer {}", config.api_key))
+        .header("Authorization", format!("Bearer {}", config.api_key.clone().unwrap()))
         .json(&json!({
             "model": &config.model,
             "messages": [

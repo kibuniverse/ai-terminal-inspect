@@ -50,7 +50,28 @@ cp target/release/ai-terminal-inspect /usr/local/bin/
 
 ## Configuration
 
-Before using the tool, you need to set the following environment variables:
+### Method 1: Using Config File (Recommended, Setup Once)
+
+Use the built-in config management commands. Configuration is persisted:
+
+```bash
+# Interactive setup (recommended)
+ati config init
+
+# Or set individually
+ati config set api_key your-api-key-here
+ati config set base_url https://api.minimaxi.com/v1/text/chatcompletion_v2
+ati config set model MiniMax-M2.5
+
+# View current config
+ati config show
+```
+
+Config file location: `~/.config/ai-terminal-inspect/config.toml`
+
+### Method 2: Using Environment Variables (Legacy Compatible)
+
+Environment variables take precedence over config file, useful for temporary overrides:
 
 ```bash
 # LLM API Key (required)

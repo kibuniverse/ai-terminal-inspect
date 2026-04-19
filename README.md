@@ -50,7 +50,28 @@ cp target/release/ai-terminal-inspect /usr/local/bin/
 
 ## 配置
 
-在使用前，需要设置以下环境变量：
+### 方式一：使用配置文件（推荐，只需设置一次）
+
+使用内置的配置管理命令，配置会持久化保存：
+
+```bash
+# 交互式配置（推荐）
+ati config init
+
+# 或者逐个设置
+ati config set api_key your-api-key-here
+ati config set base_url https://api.minimaxi.com/v1/text/chatcompletion_v2
+ati config set model MiniMax-M2.5
+
+# 查看当前配置
+ati config show
+```
+
+配置文件保存在：`~/.config/ai-terminal-inspect/config.toml`
+
+### 方式二：使用环境变量（兼容旧版）
+
+环境变量优先级高于配置文件，可用于临时覆盖：
 
 ```bash
 # LLM API 密钥（必需）
